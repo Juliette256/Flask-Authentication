@@ -32,7 +32,7 @@ class Item(Resource):
         connection.close()
 
         if row:
-            return {"item":{"name":row[0], "price":[1]}}
+            return {"item":{"name":row[0], "price":row[1]}}
 
     def post(self, name):
         if self.find_by_name(name) : 
@@ -52,8 +52,14 @@ class Item(Resource):
         return item, 201
 
     def delete(self,name):
-        global items
-        items=list(filter(lambda x :x['name'] !=name, items))
+        connection=sqlite3.connect('data.db')
+        cursor=connection.cursor()
+
+        query="DELETE FROM items WHERE name=?"
+        cursor.execute(query,(name,))
+        connection.commit()
+        connection.close()
+       
         return {'message':"Item has been deleted"}
 
     def put(self, name):
