@@ -62,4 +62,4 @@ class RegisterUser(Resource):
 
      connection.commit()
      connection.close()
-     return {"message":"User registered successfully"} ,201
+     return {"message":"User has been registered successfully"} ,201
