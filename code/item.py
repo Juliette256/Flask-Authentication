@@ -3,7 +3,6 @@ from os import name
 import sqlite3
 from flask_restful import Resource, reqparse
 from flask_jwt import jwt_required
-items=[]
 
 class Item(Resource):
     parser=reqparse.RequestParser()
@@ -18,9 +17,6 @@ class Item(Resource):
         if item:
          return item
         return{"message":"Item not found"}, 404
-        
-        # item=next(filter(lambda x :x['name']==name, items),None)
-        # return{'item':item} ,200 if item else 404
     
     @classmethod   
     def find_by_name(cls,name):
@@ -86,5 +82,17 @@ class Item(Resource):
         connection.close()
 
 class ItemList(Resource):
-    def get(self):
-        return {"items": items}
+    @jwt_required()
+    def get(name):
+    
+        connection =sqlite3.connect('data.db')
+        cursor=connection.cursor()
+
+        query="SELECT * FROM items" 
+        result=cursor.execute(query,(name,))
+        items=[]
+
+        for row in result:
+            items.append({'name':row[0], 'price':row[1]})
+        connection.close()
+        return{'items':items}
