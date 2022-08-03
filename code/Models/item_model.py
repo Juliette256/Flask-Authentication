@@ -5,7 +5,7 @@ class itemModel:
         self.price=price
 
     def json(self):
-        return{'name':self.name, 'price':self.price}
+        return{'name': self.name, 'price': self.price}
 
     @classmethod   
     def find_by_name(cls,name):
@@ -18,7 +18,7 @@ class itemModel:
         connection.close()
 
         if row:
-            return {"item":{"name":row[0], "price":row[1]}}
+            return cls(row[0],row[1])
     
   
     def insert(self):

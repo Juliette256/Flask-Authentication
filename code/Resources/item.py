@@ -24,8 +24,13 @@ class Item(Resource):
 
         data=Item.parser.parse_args()
         item= itemModel(name, data['price'])
-        item.insert()
-        return item, 201
+
+        try:
+             item.insert()
+        except:
+            return{'message':"An error occurred"}
+
+        return item.json(), 201
 
     def delete(self,name):
         connection=sqlite3.connect('data.db')
@@ -46,22 +51,29 @@ class Item(Resource):
 
         if item is None:
             # self.insert(updated_item)
-            updated_item.insert()
+            try:
+             updated_item.insert()
+            except:
+                return{"message":"An error while inserting item"}
         else:
         #   item.update(updated_item)
-            updated_item.update()
+            try:
+             updated_item.update()
+            except:
+             return{"message":"An error while updating item"}
+             
         return updated_item.json()
     
 
 class ItemList(Resource):
     @jwt_required()
-    def get(name):
+    def get(self):
     
         connection =sqlite3.connect('data.db')
         cursor=connection.cursor()
 
         query="SELECT * FROM items" 
-        result=cursor.execute(query,(name,))
+        result=cursor.execute(query)
         items=[]
 
         for row in result:

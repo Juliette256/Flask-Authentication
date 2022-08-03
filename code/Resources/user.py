@@ -12,7 +12,7 @@ class RegisterUser(Resource):
  def post(self):
      data=RegisterUser.parser.parse_args()
      if UserModel.find_by_username(data['username']):
-         return {"message":"Already exists"},400
+         return {"message":"User already exists"},400
 
      connection=sqlite3.connect('data.db')
      cursor=connection.cursor()
