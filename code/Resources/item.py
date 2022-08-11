@@ -1,4 +1,3 @@
-import json
 import sqlite3
 from flask_restful import Resource, reqparse
 from flask_jwt import jwt_required
@@ -21,48 +20,33 @@ class Item(Resource):
     def post(self, name):
         if itemModel.find_by_name(name) : 
             return {'messsage':"An item with name'{}' already exists.".format(name)},400
-
         data=Item.parser.parse_args()
         item= itemModel(name, data['price'])
-
         try:
-             item.insert()
+             item.save_to_database()
         except:
             return{'message':"An error occurred"}
-
         return item.json(), 201
 
     def delete(self,name):
-        connection=sqlite3.connect('data.db')
-        cursor=connection.cursor()
-
-        query="DELETE FROM items WHERE name=?"
-        cursor.execute(query,(name,))
-        connection.commit()
-        connection.close()
+        item=itemModel.find_by_name(name)
+        if item:
+            item.delete_from_database()
+        return {'message':"Item deleted successfully"}
        
-        return {'message':"Item has been deleted"}
 
     def put(self, name):
     
         data=Item.parser.parse_args()
         item=itemModel.find_by_name(name)
-        updated_item= itemModel(name, data['price'])
 
         if item is None:
-            # self.insert(updated_item)
-            try:
-             updated_item.insert()
-            except:
-                return{"message":"An error while inserting item"}
+          item=itemModel(name, data['price'])
         else:
-        #   item.update(updated_item)
-            try:
-             updated_item.update()
-            except:
-             return{"message":"An error while updating item"}
+           item.price=data['price']  
+        item.save_to_database()
              
-        return updated_item.json()
+        return item.json()
     
 
 class ItemList(Resource):
@@ -77,6 +61,6 @@ class ItemList(Resource):
         items=[]
 
         for row in result:
-            items.append({'name':row[0], 'price':row[1]})
+            items.append({'name':row[1], 'price':row[2]})
         connection.close()
         return{'items':items}
