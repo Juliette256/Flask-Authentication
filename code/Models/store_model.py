@@ -1,24 +1,17 @@
-from sqlalchemy import ForeignKey
 from database import db
 
-class itemModel(db.Model):
+class storeModel(db.Model):
 
-    __tablename__= "items"
-
+    __tablename__= "stores"
     id=db.Column(db.Integer, primary_key=True)
-    name=db.Column(db.String(30))
-    price=db.Column(db.Float(precision=2))
-
-    store_id=db.Column(db.Integer, db.ForeignKey('stores.id'))
-    store=db.relationship('storeModel')
-
-    def __init__(self, name, price, store_id):
+    name=db.Column(db.String(80))
+    
+    items=db.relationship('itemModel', lazy='dynamic')
+    def __init__(self, name):
         self.name=name
-        self.price=price 
-        self.store_id=store_id
 
     def json(self):
-        return{'name': self.name, 'price': self.price}
+        return{'name': self.name, 'items': [items.json() for items in self.items.all]}
 
     @classmethod   
     def find_by_name(cls,name):

@@ -1,3 +1,4 @@
+from pickletools import int4
 import sqlite3
 from flask_restful import Resource, reqparse
 from flask_jwt import jwt_required
@@ -9,6 +10,11 @@ class Item(Resource):
          type=float,
          required=True,
          help='This can not be empty')
+    parser.add_argument('store_id',
+         type=int4,
+         required=True,
+         help='Every item has a store')
+
 
     @jwt_required()
     def get(self, name):
@@ -21,7 +27,7 @@ class Item(Resource):
         if itemModel.find_by_name(name) : 
             return {'messsage':"An item with name'{}' already exists.".format(name)},400
         data=Item.parser.parse_args()
-        item= itemModel(name, data['price'])
+        item= itemModel(name, **data)
         try:
              item.save_to_database()
         except:
@@ -41,7 +47,7 @@ class Item(Resource):
         item=itemModel.find_by_name(name)
 
         if item is None:
-          item=itemModel(name, data['price'])
+          item=itemModel(name, **data)
         else:
            item.price=data['price']  
         item.save_to_database()
